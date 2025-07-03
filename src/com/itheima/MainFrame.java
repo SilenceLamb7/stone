@@ -1,24 +1,30 @@
 package com.itheima;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.security.Key;
+import java.util.Random;
 
 public class MainFrame extends JFrame implements KeyListener {//KeyListener是自带的，在这里实现接口
-    int[][] datas={
-            {0,2,2,4},
-            {2,2,4,4},
-            {0,8,2,4},
-            {0,32,0,64}
-    };
+    int[][] datas=new int[4][4];
+    int loseFlag=0;
+    int winFlag=0;
+    int score=0;
+    public void initData(){
+        generateNum();
+        generateNum();
+    }
     public MainFrame(){
         initFrame();
+        initData();
         printView();
         setVisible(true);//可视化
     }
-    public void initFrame(){
-        setSize(514,538);//调用成员方法，设置窗体可见
+    public void initFrame(){//初始化窗体
+        //setSize(514,538);//调用成员方法，设置窗体可见
+        setSize(540,600);
         setLocationRelativeTo(null);  // 窗口居中显示
         setAlwaysOnTop(true);//置顶
         setDefaultCloseOperation(3);//窗体关闭终止java程序
@@ -27,10 +33,20 @@ public class MainFrame extends JFrame implements KeyListener {//KeyListener是�
 
         this.addKeyListener(this);//为窗体添加键盘监听
     }
-    public void printView(){
+    public void printView(){//绘制游戏界面
         //移除界面内容
         getContentPane().removeAll();
 
+        if (loseFlag==1){
+            JLabel loseLabel =new JLabel(new ImageIcon("D:\\SWim\\lose.jpg"));
+            loseLabel.setBounds(40,40,420,420);
+            getContentPane().add(loseLabel);//把JLabel对象添加到面板
+        }
+        else if (winFlag==1){
+            JLabel winLabel =new JLabel(new ImageIcon("D:\\SWim\\win.jpg"));
+            winLabel.setBounds(40,40,420,420);
+            getContentPane().add(winLabel);//把JLabel对象添加到面板
+        }
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 JLabel image =new JLabel(new ImageIcon("D:\\SWim\\"+datas[i][j]+".jpg"));
@@ -41,9 +57,14 @@ public class MainFrame extends JFrame implements KeyListener {//KeyListener是�
         //添加背景
         JLabel image =new JLabel(new ImageIcon("D:\\SWim\\background.jpg"));
         image.setBounds(40,40,420,420);
-        super.getContentPane().add(image);//把JLabel对象添加到面板
+        getContentPane().add(image);//把JLabel对象添加到面板
         //调用父类的方法，并且若子类未改写，不用写super就可
 
+
+        JLabel back =new JLabel("得分:"+score);
+        back.setBounds(50,10,100,30);
+        back.setFont(new Font("微软雅黑", Font.PLAIN, 24));
+        getContentPane().add(back);//把JLabel对象添加到面板
         //刷新界面
         getContentPane().repaint();
     }
@@ -69,22 +90,27 @@ public class MainFrame extends JFrame implements KeyListener {//KeyListener是�
             leftMove();
             System.out.println("左");
             printArray();
+            generateNum();
         }
         else if (code==38){
             topMove();
             System.out.println("上");
             printArray();
+            generateNum();
         }
         else if(code==39){
             rightMove();
             System.out.println("右");
             printArray();
+            generateNum();
         }
         else if(code==40){
             downMove();
             System.out.println("下");
             printArray();
+            generateNum();
         }
+        check();
         printView();//重新绘制
     }
 
@@ -110,6 +136,8 @@ public class MainFrame extends JFrame implements KeyListener {//KeyListener是�
             for (int j = 0; j <3; j++) {
                 if (datas[i][j]==datas[i][j+1]&&datas[i][j]!=0) {
                     datas[i][j] *= 2;
+
+                    score+=datas[i][j];
                     //后续前移，末尾补零
                     for (int k = j+1; k <3; k++) {
                         datas[i][k]=datas[i][k+1];
@@ -174,11 +202,120 @@ public class MainFrame extends JFrame implements KeyListener {//KeyListener是�
     }
 
     //下移，先顺时针旋转再左移再旋转回来
-    private void downMove() {
+    public void downMove() {
         rotateMatrixRight();
         leftMove();
         rotateMatrixLeft();
     }
 
-    
+    public boolean checkLeft(){
+        int[][] newArr=new int[4][4];
+        copyArray(datas,newArr);
+        leftMove();
+        boolean flag=false;
+        lo:
+        for (int i = 0; i < datas.length; i++) {
+            for (int j = 0; j < datas[i].length; j++) {
+                if (datas[i][j]!=newArr[i][j]){
+                    flag=true;
+                    break lo;
+                }
+            }
+        }
+        copyArray(newArr,datas);
+        return flag;
+    }
+
+    public void check(){
+        if (checkLeft()==false&&checkRight()==false&&checkTop()==false&&checkDown()==false){
+            System.out.println("游戏失败了");
+            loseFlag=1;
+        }
+    }
+
+    public boolean checkDown() {
+        int[][] newArr=new int[4][4];
+        copyArray(datas,newArr);
+        downMove();
+        boolean flag = false;
+        lo:
+        for (int i = 0; i < datas.length; i++) {
+            for (int j = 0; j < datas[i].length; j++) {
+                if (datas[i][j]!=newArr[i][j]){
+                    flag=true;
+                    break lo;
+                }
+            }
+        }
+        copyArray(newArr,datas);
+        return flag;
+    }
+
+    public boolean checkTop() {
+        int[][] newArr=new int[4][4];
+        copyArray(datas,newArr);
+        topMove();
+        boolean flag=false;
+        lo:
+        for (int i = 0; i < datas.length; i++) {
+            for (int j = 0; j < datas[i].length; j++) {
+                if (datas[i][j]!=newArr[i][j]){
+                    flag=true;
+                    break lo;
+                }
+            }
+        }
+        copyArray(newArr,datas);
+        return flag;
+    }
+
+    public boolean checkRight() {
+        int[][] newArr=new int[4][4];
+        copyArray(datas,newArr);
+        rightMove();
+        boolean flag=false;
+        lo:
+        for (int i = 0; i < datas.length; i++) {
+            for (int j = 0; j < datas[i].length; j++) {
+                if (datas[i][j]!=newArr[i][j]){
+                    flag=true;
+                    break lo;
+                }
+            }
+        }
+        copyArray(newArr,datas);
+        return flag;
+    }
+
+    public void copyArray(int[][]src,int[][]newArr){
+        for (int i = 0; i < src.length; i++) {
+            for (int j = 0; j < src[i].length; j++) {
+                newArr[i][j]=src[i][j];
+            }
+        }
+    }
+
+    public void generateNum(){
+        int[] arrayI={-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
+        int[] arrayJ={-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
+        int w=0;
+        for (int i = 0; i < datas.length; i++) {
+            for (int j = 0; j < datas[i].length; j++) {
+                if (datas[i][j]==0){
+                    arrayI[w]=i;
+                    arrayJ[w]=j;
+                    w++;
+                    //w 从 0 开始计数，但 写入位置是 arrayI[w] 和 arrayJ[w] 之后才 w++，因此有效索引是 [0, w-1]。
+                }
+            }
+        }
+        if(w!=0){
+            Random r = new Random();
+            int index =r.nextInt(w);
+            int x=arrayI[index];
+            int y=arrayJ[index];
+            datas[x][y]=2;
+        }
+
+    }
 }
