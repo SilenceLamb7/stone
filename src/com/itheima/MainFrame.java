@@ -10,7 +10,6 @@ import java.util.Random;
 public class MainFrame extends JFrame implements KeyListener {//KeyListener是自带的，在这里实现接口
     int[][] datas=new int[4][4];
     int loseFlag=0;
-    int winFlag=0;
     int score=0;
     public void initData(){
         generateNum();
@@ -42,11 +41,6 @@ public class MainFrame extends JFrame implements KeyListener {//KeyListener是�
             loseLabel.setBounds(40,40,420,420);
             getContentPane().add(loseLabel);//把JLabel对象添加到面板
         }
-        else if (winFlag==1){
-            JLabel winLabel =new JLabel(new ImageIcon("D:\\SWim\\win.jpg"));
-            winLabel.setBounds(40,40,420,420);
-            getContentPane().add(winLabel);//把JLabel对象添加到面板
-        }
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 JLabel image =new JLabel(new ImageIcon("D:\\SWim\\"+datas[i][j]+".jpg"));
@@ -62,7 +56,7 @@ public class MainFrame extends JFrame implements KeyListener {//KeyListener是�
 
 
         JLabel back =new JLabel("得分:"+score);
-        back.setBounds(50,10,100,30);
+        back.setBounds(50,10,500,30);
         back.setFont(new Font("微软雅黑", Font.PLAIN, 24));
         getContentPane().add(back);//把JLabel对象添加到面板
         //刷新界面
@@ -85,27 +79,27 @@ public class MainFrame extends JFrame implements KeyListener {//KeyListener是�
     @Override
     public void keyPressed(KeyEvent e) {//键盘按下
         int code =e.getKeyCode();
-//        System.out.println(code);//左上右下37 38 39 40
+        //System.out.println(code);//左上右下37 38 39 40
         if (code==37){
-            leftMove();
+            leftMove(1);
             System.out.println("左");
             printArray();
             generateNum();
         }
         else if (code==38){
-            topMove();
+            topMove(1);
             System.out.println("上");
             printArray();
             generateNum();
         }
         else if(code==39){
-            rightMove();
+            rightMove(1);
             System.out.println("右");
             printArray();
             generateNum();
         }
         else if(code==40){
-            downMove();
+            downMove(1);
             System.out.println("下");
             printArray();
             generateNum();
@@ -119,7 +113,8 @@ public class MainFrame extends JFrame implements KeyListener {//KeyListener是�
 
     }
 
-    public void leftMove(){//左移要先把非0挪到前面再进行一次合并
+    public void leftMove(int flag){//左移要先把非0挪到前面再进行一次合并
+
         for (int i = 0; i < datas.length; i++) {//datas.length数组长度，即几行
             int newArr[] = new int[4];//自动初始化为0
             int index = 0;
@@ -136,8 +131,10 @@ public class MainFrame extends JFrame implements KeyListener {//KeyListener是�
             for (int j = 0; j <3; j++) {
                 if (datas[i][j]==datas[i][j+1]&&datas[i][j]!=0) {
                     datas[i][j] *= 2;
+                    if(flag==1){
+                        score+=datas[i][j];
+                    }
 
-                    score+=datas[i][j];
                     //后续前移，末尾补零
                     for (int k = j+1; k <3; k++) {
                         datas[i][k]=datas[i][k+1];
@@ -149,11 +146,11 @@ public class MainFrame extends JFrame implements KeyListener {//KeyListener是�
     }
 
     //右移本质上也可以切换成左移
-    public void rightMove(){
+    public void rightMove(int flag){
         //1.二维数组反转
         reverse();
         //2.左移动
-        leftMove();
+        leftMove(flag);
         //3.反转数组
         reverse();
     }
@@ -173,10 +170,10 @@ public class MainFrame extends JFrame implements KeyListener {//KeyListener是�
     }
 
     //上移，先逆时针旋转再左移再旋转回来
-    private void topMove() {
+    private void topMove(int flag) {
 
         rotateMatrixLeft();
-        leftMove();
+        leftMove(flag);
         rotateMatrixRight();
     }
 
@@ -190,7 +187,6 @@ public class MainFrame extends JFrame implements KeyListener {//KeyListener是�
         }
         datas=temp;
     }
-
     private void rotateMatrixRight() {
         int[][] temp = new int[4][4];
         for (int i = 0; i < 4; i++) {
@@ -202,16 +198,16 @@ public class MainFrame extends JFrame implements KeyListener {//KeyListener是�
     }
 
     //下移，先顺时针旋转再左移再旋转回来
-    public void downMove() {
+    public void downMove(int flag) {
         rotateMatrixRight();
-        leftMove();
+        leftMove(flag);
         rotateMatrixLeft();
     }
 
     public boolean checkLeft(){
         int[][] newArr=new int[4][4];
         copyArray(datas,newArr);
-        leftMove();
+        leftMove(2);
         boolean flag=false;
         lo:
         for (int i = 0; i < datas.length; i++) {
@@ -236,7 +232,7 @@ public class MainFrame extends JFrame implements KeyListener {//KeyListener是�
     public boolean checkDown() {
         int[][] newArr=new int[4][4];
         copyArray(datas,newArr);
-        downMove();
+        downMove(2);
         boolean flag = false;
         lo:
         for (int i = 0; i < datas.length; i++) {
@@ -254,7 +250,7 @@ public class MainFrame extends JFrame implements KeyListener {//KeyListener是�
     public boolean checkTop() {
         int[][] newArr=new int[4][4];
         copyArray(datas,newArr);
-        topMove();
+        topMove(2);
         boolean flag=false;
         lo:
         for (int i = 0; i < datas.length; i++) {
@@ -272,7 +268,7 @@ public class MainFrame extends JFrame implements KeyListener {//KeyListener是�
     public boolean checkRight() {
         int[][] newArr=new int[4][4];
         copyArray(datas,newArr);
-        rightMove();
+        rightMove(2);
         boolean flag=false;
         lo:
         for (int i = 0; i < datas.length; i++) {
